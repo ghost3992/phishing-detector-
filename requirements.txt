@@ -1,0 +1,6 @@
+flask
+gunicorn
+python-whois
+requests
+scikit-learn
+pandas

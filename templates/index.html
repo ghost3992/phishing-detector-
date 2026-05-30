@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phishing Detector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 520px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #ffffff;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.5);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255,255,255,0.35);
+        }
+
+        input[type="text"]:focus {
+            border-color: #7c6ff7;
+        }
+
+        button {
+            padding: 14px 22px;
+            background: linear-gradient(135deg, #7c6ff7, #5a54d4);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 111, 247, 0.5);
+        }
+
+        .result {
+            margin-top: 24px;
+            padding: 18px 24px;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .result.phishing {
+            background: rgba(255, 70, 70, 0.15);
+            border: 1px solid rgba(255, 70, 70, 0.4);
+            color: #ff6b6b;
+        }
+
+        .result.safe {
+            background: rgba(50, 215, 120, 0.15);
+            border: 1px solid rgba(50, 215, 120, 0.4);
+            color: #32d778;
+        }
+
+        .detection-steps {
+            margin-top: 20px;
+            text-align: left;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .step {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+            animation: slideIn 0.3s ease;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+        }
+
+        .step-icon {
+            min-width: 20px;
+            font-weight: bold;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .step-desc {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: rgba(255,255,255,0.25);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">🛡️</div>
+        <h2>Phishing URL Detector</h2>
+        <p class="subtitle">Enter any URL to check if it's safe or a phishing attempt</p>
+
+        <form method="POST" action="/">
+            <div class="input-group">
+                <input type="text" name="url" placeholder="https://example.com" required>
+                <button type="submit">Check</button>
+            </div>
+        </form>
+
+        {% if result is defined %}
+            {% if result == 'phishing' %}
+                <div class="result phishing">⚠️ Phishing Website Detected!</div>
+            {% else %}
+                <div class="result safe">✅ Safe Website</div>
+            {% endif %}
+
+            {% if steps is defined %}
+                <div class="detection-steps">
+                    <strong style="color: rgba(255,255,255,0.7); font-size: 12px;">Detection Details:</strong>
+                    {% for step_title, step_desc in steps %}
+                        <div class="step">
+                            <div class="step-icon">
+                                {% if step_title.startswith('✓') %}
+                                    ✓
+                                {% elif step_title.startswith('✗') %}
+                                    ✗
+                                {% else %}
+                                    ⚠
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="step-title">{{ step_title.replace('✓ ', '').replace('✗ ', '').replace('⚠ ', '') }}</div>
+                                <div class="step-desc">{{ step_desc }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endif %}
+
+</html>
